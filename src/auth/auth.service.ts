@@ -1,7 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/users/entities/user';
-import { UsersService } from 'src/users/users.service';
+import { User } from '../users/entities/user';
+import { UsersService } from '../users/users.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 
 @Injectable()

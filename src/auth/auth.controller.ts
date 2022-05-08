@@ -9,7 +9,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { Request as ExpressRequest } from 'express';
-import { User } from 'src/users/entities/user';
+import { User } from '../users/entities/user';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
-import { Roles, User } from 'src/users/entities/user';
+import { Roles, User } from '../users/entities/user';
 
 @Injectable()
 export class OnlyAdminGuard implements CanActivate {
