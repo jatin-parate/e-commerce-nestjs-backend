@@ -21,9 +21,6 @@ export class Product {
   @Column()
   description: string;
 
-  // @Column('string', { array: true, default: [] })
-  // images!: string[];
-
   @Column()
   quantity!: number;
 

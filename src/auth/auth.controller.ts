@@ -16,7 +16,10 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { ApiTags, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { LoginDto } from './dtos/login.dto';
 
+@ApiTags('Auth')
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
@@ -25,11 +28,13 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiBody({ type: LoginDto })
   async login(@Request() req: ExpressRequest) {
     return await this.authService.login(req.user as User);
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Get('profile')
   async getProfile(@Request() req: ExpressRequest): Promise<User> {
     return req.user as User;

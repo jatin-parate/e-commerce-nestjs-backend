@@ -78,7 +78,7 @@ describe('ProductsService', () => {
         description: faker.random.words(),
         quantity: faker.datatype.number({ min: 0 }),
       };
-      const { id } = await service.create(productData);
+      const { id } = await service.create(productData as any);
       const product = await productRepo.findOne(id);
 
       expect(product).toMatchObject(productData);

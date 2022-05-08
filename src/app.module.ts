@@ -46,10 +46,9 @@ export class AppModule implements OnApplicationShutdown {
     private readonly connection: Connection,
   ) {}
 
-  async onApplicationShutdown(signal?: string) {
-    if (this.connection.isConnected) {
-      await this.connection.close();
-      console.log('connection to db is closed!');
-    }
+  async onApplicationShutdown() {
+    // if (this.connection.isConnected) {
+    //   await this.connection.close();
+    // }
   }
 }

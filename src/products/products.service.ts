@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindConditions, Like, Repository } from 'typeorm';
+import { CreateProductDto } from './dtos/create-product.dto';
 import { Product } from './entities/product';
 
 @Injectable()
@@ -10,16 +11,23 @@ export class ProductsService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  async findAllActiveAndNonDeleted(): Promise<Product[]> {
+  async findAllActiveAndNonDeleted(productName?: string): Promise<Product[]> {
+    const extraWhereOptions: FindConditions<Product> = {};
+
+    if (productName) {
+      extraWhereOptions.name = Like(`%${productName}%`);
+    }
+
     return await this.productRepository.find({
       where: {
+        ...extraWhereOptions,
         isActive: true,
         deletedAt: null,
       },
     });
   }
 
-  async create(product: Partial<Product>): Promise<Product> {
+  async create(product: CreateProductDto): Promise<Product> {
     return await this.productRepository.save(product);
   }
 }
