@@ -3,6 +3,8 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Post,
   Request,
   UseGuards,
@@ -22,8 +24,9 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   async login(@Request() req: ExpressRequest) {
-    return this.authService.login(req.user as User);
+    return await this.authService.login(req.user as User);
   }
 
   @UseGuards(JwtAuthGuard)

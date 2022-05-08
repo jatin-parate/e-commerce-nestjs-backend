@@ -9,7 +9,9 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      envFilePath: `.env${process.env.NODE_ENV === 'test' ? '.test' : ''}`,
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
