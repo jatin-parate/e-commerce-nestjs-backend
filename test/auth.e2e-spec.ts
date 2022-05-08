@@ -13,7 +13,7 @@ describe('AuthController (e2e)', () => {
   let usersRepo: Repository<User>;
   let jwtService: JwtService;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -25,11 +25,13 @@ describe('AuthController (e2e)', () => {
     await app.init();
     usersRepo = moduleFixture.get<Repository<User>>(getRepositoryToken(User));
     jwtService = moduleFixture.get<JwtService>(JwtService);
+  });
 
+  beforeEach(async () => {
     await usersRepo.clear();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
   });
 

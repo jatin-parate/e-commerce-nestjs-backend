@@ -1,11 +1,16 @@
-import { Module } from '@nestjs/common';
+import { Module, OnApplicationShutdown } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import {
+  InjectConnection,
+  TypeOrmModule,
+  TypeOrmModuleOptions,
+} from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ProductsModule } from './products/products.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { Connection } from 'typeorm';
 
 @Module({
   imports: [
@@ -35,4 +40,16 @@ import { AuthModule } from './auth/auth.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements OnApplicationShutdown {
+  constructor(
+    @InjectConnection()
+    private readonly connection: Connection,
+  ) {}
+
+  async onApplicationShutdown(signal?: string) {
+    if (this.connection.isConnected) {
+      await this.connection.close();
+      console.log('connection to db is closed!');
+    }
+  }
+}
