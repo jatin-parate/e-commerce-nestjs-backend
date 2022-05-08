@@ -89,9 +89,9 @@ describe('ProductsService', () => {
     });
   });
 
-  describe('findAll', () => {
+  describe('findAllActiveAndNonDeleted', () => {
     it('should return empty array if no products', async () => {
-      const products = await service.findAll();
+      const products = await service.findAllActiveAndNonDeleted();
 
       expect(products).toEqual([]);
     });
@@ -107,7 +107,7 @@ describe('ProductsService', () => {
         });
       }
 
-      const products = await service.findAll();
+      const products = await service.findAllActiveAndNonDeleted();
 
       for (const product of products) {
         expect(product).toMatchObject({
@@ -118,6 +118,38 @@ describe('ProductsService', () => {
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
           deletedAt: null,
+          id: expect.any(Number),
+        });
+      }
+    }, 30000);
+
+    it('should not return deleted and inActive products', async () => {
+      const totalProducts = faker.datatype.number({ min: 1, max: 10 });
+      for (let i = 0; i < totalProducts; i++) {
+        await productRepo.save({
+          name: faker.commerce.productName(),
+          price: faker.datatype.number(),
+          description: faker.random.words(),
+          quantity: faker.datatype.number({ min: 0 }),
+          isActive: faker.datatype.boolean(),
+          deletedAt: faker.datatype.boolean()
+            ? faker.datatype.datetime({ max: Date.now() })
+            : null,
+        });
+      }
+
+      const products = await service.findAllActiveAndNonDeleted();
+
+      for (const product of products) {
+        expect(product).toMatchObject({
+          name: expect.any(String),
+          price: expect.any(Number),
+          description: expect.any(String),
+          quantity: expect.any(Number),
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+          deletedAt: null,
+          isActive: true,
           id: expect.any(Number),
         });
       }

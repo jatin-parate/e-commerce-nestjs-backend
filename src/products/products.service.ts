@@ -10,8 +10,13 @@ export class ProductsService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  async findAll(): Promise<Product[]> {
-    return await this.productRepository.find();
+  async findAllActiveAndNonDeleted(): Promise<Product[]> {
+    return await this.productRepository.find({
+      where: {
+        isActive: true,
+        deletedAt: null,
+      },
+    });
   }
 
   async create(product: Partial<Product>): Promise<Product> {
