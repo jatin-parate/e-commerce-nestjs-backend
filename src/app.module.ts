@@ -16,6 +16,7 @@ import { Connection } from 'typeorm';
   imports: [
     ConfigModule.forRoot({
       envFilePath: `.env${process.env.NODE_ENV === 'test' ? '.test' : ''}`,
+      isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

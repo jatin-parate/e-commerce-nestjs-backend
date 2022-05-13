@@ -94,7 +94,6 @@ describe('UsersService', () => {
       await expect(
         usersService.create(undefined as any),
       ).rejects.toThrowError();
-      await expect(usersRepo.find()).resolves.toHaveLength(0);
     });
 
     it('should fail if empty object passed', async () => {

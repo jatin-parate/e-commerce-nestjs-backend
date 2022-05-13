@@ -4,6 +4,7 @@ import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { Repository } from 'typeorm';
 import { Roles, User } from '../src/users/entities/user';
+import { AuthService } from '../src/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import faker from '@faker-js/faker';
@@ -12,6 +13,7 @@ describe('AuthController (e2e)', () => {
   let app: INestApplication;
   let usersRepo: Repository<User>;
   let jwtService: JwtService;
+  let authService: AuthService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -25,6 +27,7 @@ describe('AuthController (e2e)', () => {
     await app.init();
     usersRepo = moduleFixture.get<Repository<User>>(getRepositoryToken(User));
     jwtService = moduleFixture.get<JwtService>(JwtService);
+    authService = moduleFixture.get<AuthService>(AuthService);
   });
 
   beforeEach(async () => {
@@ -70,15 +73,16 @@ describe('AuthController (e2e)', () => {
     });
 
     it('should return a token', async () => {
+      const password = faker.internet.password();
       const user = await usersRepo.save({
         email: faker.internet.email(),
-        password: faker.internet.password(),
+        password: await authService.hashPassword(password),
         name: faker.internet.userName(),
       });
 
       const response = await request(app.getHttpServer())
         .post('/auth/login')
-        .send({ username: user.email, password: user.password });
+        .send({ username: user.email, password });
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body.access_token).toBeDefined();
       const decodedToken = jwtService.decode(response.body.access_token);

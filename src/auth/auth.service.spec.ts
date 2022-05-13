@@ -101,16 +101,17 @@ describe('AuthService', () => {
     });
 
     it('should return user if it exists and password matches', async () => {
+      const password = faker.internet.password(5);
       let user = usersRepo.create({
         email: faker.internet.email(),
         name: faker.internet.userName(),
-        password: faker.internet.password(5),
+        password: await authService.hashPassword(password),
       });
 
       user = await usersRepo.save(user);
 
       await expect(
-        authService.validateUser(user.email, user.password),
+        authService.validateUser(user.email, password),
       ).resolves.toMatchObject(user);
     });
   });

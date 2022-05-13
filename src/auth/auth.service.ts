@@ -1,20 +1,44 @@
 import { ConflictException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import * as crypto from 'crypto';
+import * as utils from 'util';
+
 import { User } from '../users/entities/user';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from './dtos/create-user.dto';
+
+const pbkdf2 = utils.promisify(crypto.pbkdf2);
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
+    private readonly configService: ConfigService,
   ) {}
+
+  async hashPassword(password: string) {
+    const hashedPassword = await pbkdf2(
+      password,
+      this.configService.get<string>('APP_SECRET'),
+      100000,
+      64,
+      'sha512',
+    );
+    return hashedPassword.toString('hex');
+  }
 
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.usersService.findOne(email);
 
-    if (user && user.password === password) {
+    if (!user) {
+      return null;
+    }
+
+    const hashedPassword = await this.hashPassword(password);
+
+    if (user.password === hashedPassword) {
       return user;
     }
     return null;
@@ -34,6 +58,7 @@ export class AuthService {
       throw new ConflictException('User already exists');
     }
 
+    user.password = await this.hashPassword(user.password);
     return this.usersService.create(user);
   }
 }
