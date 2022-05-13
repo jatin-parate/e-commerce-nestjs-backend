@@ -30,6 +30,6 @@ export class CreateProductDto {
 
   @IsBoolean()
   @IsOptional()
-  @ApiProperty({ required: false })
-  isActive: boolean;
+  @ApiProperty({ required: false, default: false })
+  isActive = false;
 }
