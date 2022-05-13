@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindConditions, Like, Repository } from 'typeorm';
+import { FindConditions, IsNull, Like, Not, Repository } from 'typeorm';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { Product } from './entities/product';
 
@@ -18,16 +18,16 @@ export class ProductsService {
       extraWhereOptions.name = Like(`%${productName}%`);
     }
 
-    if (isActive != null) {
-      extraWhereOptions.isActive = isActive;
+    if (isActive === true) {
+      extraWhereOptions.isActive = true;
+      extraWhereOptions.deletedAt = null;
+    } else if (isActive === false) {
+      extraWhereOptions.isActive = false;
+      extraWhereOptions.deletedAt = Not(IsNull());
     }
 
     return await this.productRepository.find({
-      where: {
-        ...extraWhereOptions,
-        isActive: true,
-        deletedAt: null,
-      },
+      where: extraWhereOptions,
     });
   }
 

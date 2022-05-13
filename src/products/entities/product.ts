@@ -38,4 +38,8 @@ export class Product {
 
   @Column({ default: false })
   isBestSeller!: boolean;
+
+  constructor(partial?: Partial<Product>) {
+    Object.assign(this, partial);
+  }
 }
