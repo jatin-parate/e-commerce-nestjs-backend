@@ -56,7 +56,7 @@ describe('AuthService', () => {
     authService = module.get<AuthService>(AuthService);
     usersRepo = module.get(getRepositoryToken(User));
     jwtService = module.get<JwtService>(JwtService);
-    usersRepo.clear();
+    await usersRepo.clear();
   });
 
   afterEach(async () => {
