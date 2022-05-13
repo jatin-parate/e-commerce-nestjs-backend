@@ -1,8 +1,9 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OnlyAdminGuard } from '../guards/only-admin.guard';
 import { CreateProductDto } from './dtos/create-product.dto';
+import { GetAllProductsQueryDto } from './dtos/get-all-products-query.dto';
 import { ProductsService } from './products.service';
 
 @Controller('products')
@@ -11,8 +12,10 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get('')
-  async getAll(@Query('search') productName?: string): Promise<any> {
-    return await this.productsService.findAllActiveAndNonDeleted(productName);
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'isActive', required: false, type: Boolean })
+  async getAll(@Query() query: GetAllProductsQueryDto): Promise<any> {
+    return await this.productsService.findAll(query.isActive, query.search);
   }
 
   @Post('')

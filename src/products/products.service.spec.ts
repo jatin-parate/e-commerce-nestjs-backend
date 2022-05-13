@@ -89,9 +89,9 @@ describe('ProductsService', () => {
     });
   });
 
-  describe('findAllActiveAndNonDeleted', () => {
+  describe('findAll', () => {
     it('should return empty array if no products', async () => {
-      const products = await service.findAllActiveAndNonDeleted();
+      const products = await service.findAll();
 
       expect(products).toEqual([]);
     });
@@ -107,7 +107,7 @@ describe('ProductsService', () => {
         });
       }
 
-      const products = await service.findAllActiveAndNonDeleted();
+      const products = await service.findAll();
 
       for (const product of products) {
         expect(product).toMatchObject({
@@ -138,7 +138,7 @@ describe('ProductsService', () => {
         });
       }
 
-      const products = await service.findAllActiveAndNonDeleted();
+      const products = await service.findAll(false);
 
       for (const product of products) {
         expect(product).toMatchObject({

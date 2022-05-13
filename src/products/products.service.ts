@@ -11,11 +11,15 @@ export class ProductsService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  async findAllActiveAndNonDeleted(productName?: string): Promise<Product[]> {
+  async findAll(isActive?: boolean, productName?: string): Promise<Product[]> {
     const extraWhereOptions: FindConditions<Product> = {};
 
     if (productName) {
       extraWhereOptions.name = Like(`%${productName}%`);
+    }
+
+    if (isActive != null) {
+      extraWhereOptions.isActive = isActive;
     }
 
     return await this.productRepository.find({
