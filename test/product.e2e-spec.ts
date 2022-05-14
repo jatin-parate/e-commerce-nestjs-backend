@@ -18,6 +18,9 @@ describe('ProductController (e2e)', () => {
   let userData: Pick<User, 'email' | 'password' | 'name'>;
   let authService: AuthService;
   let jwtService: JwtService;
+  let token: string;
+  let adminUser: User;
+  let adminToken: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -44,6 +47,22 @@ describe('ProductController (e2e)', () => {
     user = await usersRepo.save({
       ...userData,
       password: await authService.hashPassword(userData.password),
+    });
+    token = jwtService.sign({
+      email: user.email,
+      id: user.id,
+      role: user.role,
+    });
+    adminUser = await usersRepo.save({
+      email: faker.internet.email(),
+      name: faker.internet.userName(),
+      password: await authService.hashPassword(userData.password),
+      role: Roles.ADMIN,
+    });
+    adminToken = jwtService.sign({
+      email: adminUser.email,
+      id: adminUser.id,
+      role: Roles.ADMIN,
     });
   });
 
@@ -130,29 +149,6 @@ describe('ProductController (e2e)', () => {
   });
 
   describe('/ (POST)', () => {
-    let token: string;
-    let adminUser: User;
-    let adminToken: string;
-
-    beforeAll(async () => {
-      adminUser = await usersRepo.save({
-        email: faker.internet.email(),
-        name: faker.internet.userName(),
-        password: await authService.hashPassword(userData.password),
-        role: Roles.ADMIN,
-      });
-      adminToken = jwtService.sign({
-        email: adminUser.email,
-        id: adminUser.id,
-        role: Roles.ADMIN,
-      });
-      token = jwtService.sign({
-        email: user.email,
-        id: user.id,
-        role: user.role,
-      });
-    });
-
     it('should fail if not authorized', async () => {
       await request(app.getHttpServer())
         .post('/products')
@@ -190,6 +186,41 @@ describe('ProductController (e2e)', () => {
         ...productData,
         isActive: false,
       });
+    });
+  });
+
+  describe('/:id (DELETE)', () => {
+    it('should fail if not authorized', async () => {
+      await request(app.getHttpServer())
+        .delete('/products/' + faker.datatype.number({ min: 0 }))
+        .expect(HttpStatus.UNAUTHORIZED);
+    });
+
+    it('should fail if user is not admin', async () => {
+      await request(app.getHttpServer())
+        .delete(`/products/${faker.datatype.number({ min: 0 })}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(HttpStatus.UNAUTHORIZED);
+    });
+
+    it('should fail if product does not exists', async () => {
+      await request(app.getHttpServer())
+        .delete(`/products/${faker.datatype.number({ min: 0 })}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(HttpStatus.NOT_FOUND);
+    });
+
+    it('should soft delete exact product', async () => {
+      const [product] = await global.generateRandomProduct(productsRepo);
+
+      await request(app.getHttpServer())
+        .delete(`/products/${product.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(HttpStatus.OK);
+      const productFromDb = await productsRepo.findOneOrFail(product.id, {
+        withDeleted: true,
+      });
+      expect(productFromDb.deletedAt).toBeDefined();
     });
   });
 });

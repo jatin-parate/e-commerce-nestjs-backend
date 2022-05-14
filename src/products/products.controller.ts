@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OnlyAdminGuard } from '../guards/only-admin.guard';
@@ -35,5 +46,16 @@ export class ProductsController {
   @ApiBearerAuth()
   async create(@Body() body: CreateProductDto): Promise<any> {
     return await this.productsService.create(body);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, OnlyAdminGuard)
+  @ApiBearerAuth()
+  async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    const product = await this.productsService.getNonDeletedById(id);
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+    await this.productsService.deleteProduct(product);
   }
 }

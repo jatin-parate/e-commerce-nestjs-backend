@@ -1,16 +1,13 @@
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
-import {
-  getRepositoryToken,
-  TypeOrmModule,
-  TypeOrmModuleOptions,
-} from '@nestjs/typeorm';
+import '../../test/setup';
+import { TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import faker from '@faker-js/faker';
 
 import { Product } from './entities/product';
 import { ProductsService } from './products.service';
 import { Repository } from 'typeorm';
 import { SortDirection } from './dtos/get-all-products-query.dto';
+import generateTestModule from './test-utils/generate-module';
 
 describe('ProductsService', () => {
   let service: ProductsService | undefined;
@@ -18,32 +15,7 @@ describe('ProductsService', () => {
   let productRepo: Repository<Product>;
 
   beforeEach(async () => {
-    module = await Test.createTestingModule({
-      providers: [ProductsService],
-      imports: [
-        ConfigModule.forRoot({
-          envFilePath: ['.env.test'],
-        }),
-        TypeOrmModule.forRootAsync({
-          imports: [ConfigModule],
-          inject: [ConfigService],
-          useFactory: async (configService: ConfigService) => {
-            return {
-              type: configService.get<TypeOrmModuleOptions['type']>('DB_TYPE'),
-              host: configService.get<string>('DB_HOST'),
-              port: +configService.get<number>('DB_PORT'),
-              username: configService.get<string>('DB_USERNAME'),
-              password: configService.get<string>('DB_PASSWORD'),
-              database: configService.get<string>('DB_DATABASE'),
-              autoLoadEntities: true,
-              synchronize:
-                configService.get<string>('DB_SYNCHRONIZE') === 'true',
-            } as TypeOrmModuleOptions;
-          },
-        }),
-        TypeOrmModule.forFeature([Product]),
-      ],
-    }).compile();
+    module = await generateTestModule().compile();
 
     await module.init();
 
@@ -73,12 +45,7 @@ describe('ProductsService', () => {
     });
 
     it('should create product', async () => {
-      const productData = {
-        name: faker.commerce.productName(),
-        price: faker.datatype.number(),
-        description: faker.random.words(),
-        quantity: faker.datatype.number({ min: 0 }),
-      };
+      const productData = global.generateRandomProductData();
       const { id } = await service.create(productData as any);
       const product = await productRepo.findOne(id);
 
@@ -104,14 +71,11 @@ describe('ProductsService', () => {
 
     it('should return products', async () => {
       const totalProducts = faker.datatype.number({ min: 1, max: 10 });
-      for (let i = 0; i < totalProducts; i++) {
-        await productRepo.save({
-          name: faker.commerce.productName(),
-          price: faker.datatype.number(),
-          description: faker.random.words(),
-          quantity: faker.datatype.number({ min: 0 }),
-        });
-      }
+      await Promise.all(
+        Array.from({ length: totalProducts }, () =>
+          global.generateRandomProduct(productRepo),
+        ),
+      );
 
       const products = await service.findAll({
         isActive: true,
@@ -136,18 +100,16 @@ describe('ProductsService', () => {
 
     it('should not return deleted and inActive products', async () => {
       const totalProducts = faker.datatype.number({ min: 1, max: 10 });
-      for (let i = 0; i < totalProducts; i++) {
-        await productRepo.save({
-          name: faker.commerce.productName(),
-          price: faker.datatype.number(),
-          description: faker.random.words(),
-          quantity: faker.datatype.number({ min: 0 }),
-          isActive: faker.datatype.boolean(),
-          deletedAt: faker.datatype.boolean()
-            ? faker.datatype.datetime({ max: Date.now() })
-            : null,
-        });
-      }
+      await Promise.all(
+        Array.from({ length: totalProducts }, () =>
+          global.generateRandomProduct(productRepo, {
+            isActive: faker.datatype.boolean(),
+            deletedAt: faker.datatype.boolean()
+              ? faker.datatype.datetime({ max: Date.now() })
+              : null,
+          }),
+        ),
+      );
 
       const products = await service.findAll({
         isActive: false,
@@ -170,5 +132,40 @@ describe('ProductsService', () => {
         });
       }
     }, 30000);
+  });
+
+  describe('getById', function () {
+    it('should return valid product', async () => {
+      const [product] = await global.generateRandomProduct(productRepo);
+      const { id } = product;
+
+      const foundProduct = await service.getNonDeletedById(id);
+
+      expect(foundProduct).toMatchObject(product);
+    });
+
+    it('should return null if product not found', async () => {
+      const foundProduct = await service.getNonDeletedById(
+        faker.datatype.number(),
+      );
+
+      expect(foundProduct).toBeUndefined();
+    });
+  });
+
+  describe('deleteProduct', function () {
+    it('should soft delete the product', async () => {
+      const [product] = await global.generateRandomProduct(productRepo);
+
+      const result = await service.deleteProduct(product);
+
+      expect(result.affected).toBe(1);
+
+      await expect(
+        productRepo.findOne(product.id, { withDeleted: true }),
+      ).resolves.toMatchObject({
+        deletedAt: expect.any(Date),
+      });
+    });
   });
 });

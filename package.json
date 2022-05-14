@@ -34,6 +34,7 @@
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/swagger": "^5.2.1",
     "@nestjs/typeorm": "^8.0.3",
+    "@types/pg": "^8.6.5",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "passport": "^0.5.2",
@@ -89,6 +90,7 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "globalSetup": "<rootDir>/../test/setup.ts"
   }
 }

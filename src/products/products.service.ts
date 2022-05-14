@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindConditions, IsNull, Like, Not, Repository } from 'typeorm';
+import {
+  FindConditions,
+  IsNull,
+  Like,
+  Not,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { Product } from './entities/product';
 import { GetAllProductsQueryDto } from './dtos/get-all-products-query.dto';
@@ -44,5 +51,13 @@ export class ProductsService {
 
   async create(product: CreateProductDto): Promise<Product> {
     return await this.productRepository.save(product);
+  }
+
+  async getNonDeletedById(id: number): Promise<Product | undefined> {
+    return await this.productRepository.findOne(id);
+  }
+
+  async deleteProduct(product: Product): Promise<UpdateResult> {
+    return await this.productRepository.softDelete(product.id);
   }
 }
