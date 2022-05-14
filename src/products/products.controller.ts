@@ -3,8 +3,12 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OnlyAdminGuard } from '../guards/only-admin.guard';
 import { CreateProductDto } from './dtos/create-product.dto';
-import { GetAllProductsQueryDto } from './dtos/get-all-products-query.dto';
+import {
+  GetAllProductsQueryDto,
+  SortDirection,
+} from './dtos/get-all-products-query.dto';
 import { ProductsService } from './products.service';
+import { Product } from './entities/product';
 
 @Controller('products')
 @ApiTags('Products')
@@ -14,8 +18,16 @@ export class ProductsController {
   @Get('')
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'isActive', required: false, type: Boolean })
-  async getAll(@Query() query: GetAllProductsQueryDto): Promise<any> {
-    return await this.productsService.findAll(query.isActive, query.search);
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'sort', required: false, type: String })
+  @ApiQuery({
+    name: 'order',
+    required: false,
+    type: String,
+    enum: SortDirection,
+  })
+  async getAll(@Query() query: GetAllProductsQueryDto): Promise<Product[]> {
+    return await this.productsService.findAll(query);
   }
 
   @Post('')

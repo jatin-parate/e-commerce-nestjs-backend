@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindConditions, IsNull, Like, Not, Repository } from 'typeorm';
 import { CreateProductDto } from './dtos/create-product.dto';
 import { Product } from './entities/product';
+import { GetAllProductsQueryDto } from './dtos/get-all-products-query.dto';
 
 @Injectable()
 export class ProductsService {
@@ -11,7 +12,13 @@ export class ProductsService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  async findAll(isActive?: boolean, productName?: string): Promise<Product[]> {
+  async findAll({
+    isActive,
+    search: productName,
+    limit,
+    sort,
+    order,
+  }: GetAllProductsQueryDto): Promise<Product[]> {
     const extraWhereOptions: FindConditions<Product> = {};
 
     if (productName) {
@@ -28,6 +35,10 @@ export class ProductsService {
 
     return await this.productRepository.find({
       where: extraWhereOptions,
+      take: limit,
+      order: {
+        [sort]: order,
+      },
     });
   }
 

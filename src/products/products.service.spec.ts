@@ -10,6 +10,7 @@ import faker from '@faker-js/faker';
 import { Product } from './entities/product';
 import { ProductsService } from './products.service';
 import { Repository } from 'typeorm';
+import { SortDirection } from './dtos/get-all-products-query.dto';
 
 describe('ProductsService', () => {
   let service: ProductsService | undefined;
@@ -91,7 +92,12 @@ describe('ProductsService', () => {
 
   describe('findAll', () => {
     it('should return empty array if no products', async () => {
-      const products = await service.findAll();
+      const products = await service.findAll({
+        isActive: true,
+        sort: 'name',
+        order: SortDirection.DESC,
+        limit: 10,
+      });
 
       expect(products).toEqual([]);
     });
@@ -107,7 +113,12 @@ describe('ProductsService', () => {
         });
       }
 
-      const products = await service.findAll();
+      const products = await service.findAll({
+        isActive: true,
+        sort: 'name',
+        order: SortDirection.DESC,
+        limit: 10,
+      });
 
       for (const product of products) {
         expect(product).toMatchObject({
@@ -138,7 +149,12 @@ describe('ProductsService', () => {
         });
       }
 
-      const products = await service.findAll(false);
+      const products = await service.findAll({
+        isActive: false,
+        sort: 'name',
+        order: SortDirection.DESC,
+        limit: 10,
+      });
 
       for (const product of products) {
         expect(product).toMatchObject({
