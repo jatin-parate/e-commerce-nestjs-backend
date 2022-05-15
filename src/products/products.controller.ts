@@ -7,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -20,6 +21,7 @@ import {
 } from './dtos/get-all-products-query.dto';
 import { ProductsService } from './products.service';
 import { Product } from './entities/product';
+import UpdateProductBodyDto from './dtos/update-product-body.dto';
 
 @Controller('products')
 @ApiTags('Products')
@@ -57,5 +59,19 @@ export class ProductsController {
       throw new NotFoundException('Product not found');
     }
     await this.productsService.deleteProduct(product);
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard, OnlyAdminGuard)
+  @ApiBearerAuth()
+  async updateById(
+    @Body() body: UpdateProductBodyDto,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Product> {
+    const product = await this.productsService.getByIdEvenIfDeleted(id);
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+    return await this.productsService.update(product, body.product);
   }
 }

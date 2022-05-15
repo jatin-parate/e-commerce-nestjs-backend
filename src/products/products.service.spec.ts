@@ -8,6 +8,7 @@ import { ProductsService } from './products.service';
 import { Repository } from 'typeorm';
 import { SortDirection } from './dtos/get-all-products-query.dto';
 import generateTestModule from './test-utils/generate-module';
+import { UpdateProductDto } from './dtos/update-product-body.dto';
 
 describe('ProductsService', () => {
   let service: ProductsService | undefined;
@@ -21,10 +22,6 @@ describe('ProductsService', () => {
 
     service = module.get<ProductsService>(ProductsService);
     productRepo = module.get(getRepositoryToken(Product));
-  });
-
-  beforeEach(async () => {
-    await productRepo.clear();
   });
 
   afterEach(() => {
@@ -59,6 +56,7 @@ describe('ProductsService', () => {
 
   describe('findAll', () => {
     it('should return empty array if no products', async () => {
+      await productRepo.clear();
       const products = await service.findAll({
         isActive: true,
         sort: 'name',
@@ -165,6 +163,30 @@ describe('ProductsService', () => {
         productRepo.findOne(product.id, { withDeleted: true }),
       ).resolves.toMatchObject({
         deletedAt: expect.any(Date),
+      });
+    });
+  });
+
+  describe('update', () => {
+    it('should update product', async () => {
+      const [product] = await global.generateRandomProduct(productRepo);
+      const { id } = product;
+
+      const newProduct = new UpdateProductDto({
+        name: faker.name.firstName(),
+        price: parseFloat(faker.commerce.price()),
+        description: faker.lorem.paragraph(),
+        quantity: faker.datatype.number(),
+      });
+
+      const updatedProduct = await service.update(product, newProduct);
+
+      expect(updatedProduct).toMatchObject({
+        ...newProduct,
+        id,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date),
+        deletedAt: null,
       });
     });
   });

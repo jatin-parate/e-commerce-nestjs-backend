@@ -223,4 +223,111 @@ describe('ProductController (e2e)', () => {
       expect(productFromDb.deletedAt).toBeDefined();
     });
   });
+
+  describe('/:id (PUT)', () => {
+    it('should fail if not authorized', async () => {
+      await request(app.getHttpServer())
+        .put('/products/' + faker.datatype.number({ min: 0 }))
+        .expect(HttpStatus.UNAUTHORIZED);
+    });
+
+    it('should fail if user is not admin', async () => {
+      await request(app.getHttpServer())
+        .put(`/products/${faker.datatype.number({ min: 0 })}`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(HttpStatus.UNAUTHORIZED);
+    });
+
+    it('should fail if product does not exists', async () => {
+      const productData = {
+        name: faker.commerce.productName(),
+        price: parseFloat(faker.commerce.price()),
+        description: faker.lorem.paragraph(),
+        quantity: faker.datatype.number({ min: 0 }),
+        isActive: faker.datatype.boolean(),
+        isBestSeller: faker.datatype.boolean(),
+      };
+
+      await request(app.getHttpServer())
+        .put(`/products/${faker.datatype.number({ min: 0 })}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          product: productData,
+        })
+        .expect(HttpStatus.NOT_FOUND);
+    });
+
+    it('should fail if product is empty object', async () => {
+      const [product] = await global.generateRandomProduct(productsRepo);
+
+      await request(app.getHttpServer())
+        .put(`/products/${product.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          product: {},
+        })
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('should fail if invalid request body', async () => {
+      const [product] = await global.generateRandomProduct(productsRepo);
+
+      await request(app.getHttpServer())
+        .put(`/products/${product.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          product: {
+            name: '',
+            price: 'sdf',
+            description: 1,
+            quantity: '234',
+            isActive: 'sdf',
+            isBestSeller: 'sss',
+          },
+        })
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('should fail if invalid product id', async () => {
+      const [product] = await global.generateRandomProduct(productsRepo);
+      const productData = {
+        name: faker.commerce.productName(),
+        price: parseFloat(faker.commerce.price()),
+        description: faker.lorem.paragraph(),
+        quantity: faker.datatype.number({ min: 0 }),
+        isActive: faker.datatype.boolean(),
+        isBestSeller: faker.datatype.boolean(),
+      };
+
+      await request(app.getHttpServer())
+        .put(`/products/${faker.lorem.word()}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          product: productData,
+        })
+        .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('should update exact product', async () => {
+      const [product] = await global.generateRandomProduct(productsRepo);
+      const productData = {
+        name: faker.commerce.productName(),
+        price: parseFloat(faker.commerce.price()),
+        description: faker.lorem.paragraph(),
+        quantity: faker.datatype.number({ min: 0 }),
+        isActive: faker.datatype.boolean(),
+        isBestSeller: faker.datatype.boolean(),
+      };
+
+      await request(app.getHttpServer())
+        .put(`/products/${product.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          product: productData,
+        })
+        .expect(HttpStatus.OK);
+      const productFromDb = await productsRepo.findOneOrFail(product.id);
+      expect(productFromDb).toMatchObject(productData);
+    });
+  });
 });

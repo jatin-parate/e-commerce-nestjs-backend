@@ -7,6 +7,9 @@ import { Repository } from 'typeorm';
 import faker from '@faker-js/faker';
 import generateTestModule from './test-utils/generate-module';
 import { NotFoundException } from '@nestjs/common';
+import UpdateProductBodyDto, {
+  UpdateProductDto,
+} from './dtos/update-product-body.dto';
 
 describe('ProductsController', function () {
   let module: TestingModule;
@@ -44,6 +47,54 @@ describe('ProductsController', function () {
     it('should soft delete the product', async () => {
       const [product] = await global.generateRandomProduct(productsRepo);
       await expect(controller.delete(product.id)).resolves.toBeUndefined();
+    });
+  });
+
+  describe('updateById', () => {
+    const generateRandomData = () => {
+      const body = new UpdateProductBodyDto();
+      body.product = new UpdateProductDto({
+        name: faker.commerce.productName(),
+        price: parseFloat(faker.commerce.price()),
+        description: faker.lorem.paragraph(),
+        quantity: faker.datatype.number({ min: 0 }),
+        isActive: faker.datatype.boolean(),
+        isBestSeller: faker.datatype.boolean(),
+      });
+
+      return body;
+    };
+
+    it('should fail if product is not found', async () => {
+      const body = new UpdateProductBodyDto();
+      await expect(
+        controller.updateById(body, faker.datatype.number()),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should update the product', async () => {
+      const [product] = await global.generateRandomProduct(productsRepo);
+      const body = generateRandomData();
+
+      await controller.updateById(body, product.id);
+
+      const updatedProduct = await productsRepo.findOne(product.id);
+      expect(updatedProduct).toBeDefined();
+      expect(updatedProduct).toMatchObject(body.product);
+    });
+
+    it('should update the product even if product is deleted', async () => {
+      const [product] = await global.generateRandomProduct(productsRepo);
+      await productsRepo.softDelete(product.id);
+      const body = generateRandomData();
+
+      await controller.updateById(body, product.id);
+
+      const updatedProduct = await productsRepo.findOne(product.id, {
+        withDeleted: true,
+      });
+      expect(updatedProduct).toBeDefined();
+      expect(updatedProduct).toMatchObject(body.product);
     });
   });
 });

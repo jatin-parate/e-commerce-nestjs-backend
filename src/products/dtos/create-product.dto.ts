@@ -6,8 +6,11 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { IProductData } from '../interfaces/product.interface';
 
-export class CreateProductDto {
+export class CreateProductDto
+  implements Omit<IProductData, 'deletedAt' | 'isBestSeller'>
+{
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
