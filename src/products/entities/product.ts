@@ -3,10 +3,13 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { IProduct } from '../interfaces/product.interface';
+import { ProductImage } from '../../product-images/entities/product-image.entity';
 
 @Entity()
 export class Product implements IProduct {
@@ -39,6 +42,13 @@ export class Product implements IProduct {
 
   @Column({ default: false })
   isBestSeller!: boolean;
+
+  @OneToOne(() => ProductImage, (image) => image.product, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn()
+  image: ProductImage;
 
   constructor(partial?: Partial<Product>) {
     Object.assign(this, partial);

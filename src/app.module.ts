@@ -11,6 +11,7 @@ import { ProductsModule } from './products/products.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { Connection } from 'typeorm';
+import { ProductImagesModule } from './product-images/product-images.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { Connection } from 'typeorm';
     ProductsModule,
     UsersModule,
     AuthModule,
+    ProductImagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

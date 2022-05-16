@@ -11,9 +11,7 @@ import {
 import { CreateProductDto } from './dtos/create-product.dto';
 import { Product } from './entities/product';
 import { GetAllProductsQueryDto } from './dtos/get-all-products-query.dto';
-import UpdateProductBodyDto, {
-  UpdateProductDto,
-} from './dtos/update-product-body.dto';
+import { UpdateProductDto } from './dtos/update-product-body.dto';
 
 @Injectable()
 export class ProductsService {
@@ -49,6 +47,7 @@ export class ProductsService {
       order: {
         [sort]: order,
       },
+      relations: ['image'],
     });
   }
 
@@ -61,7 +60,10 @@ export class ProductsService {
   }
 
   async getByIdEvenIfDeleted(id: number): Promise<Product | undefined> {
-    return await this.productRepository.findOne(id, { withDeleted: true });
+    return await this.productRepository.findOne(id, {
+      withDeleted: true,
+      relations: ['image'],
+    });
   }
 
   async deleteProduct(product: Product): Promise<UpdateResult> {
