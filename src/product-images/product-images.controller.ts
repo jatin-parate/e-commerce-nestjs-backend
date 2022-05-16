@@ -5,12 +5,16 @@ import {
   Delete,
   ParseIntPipe,
   Body,
-  BadRequestException,
+  NotFoundException,
+  UseGuards,
+  Get,
 } from '@nestjs/common';
 import { ProductImagesService } from './product-images.service';
 import { CreateProductImageDto } from './dtos/create-product-image.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ProductsService } from '../products/products.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OnlyAdminGuard } from '../guards/only-admin.guard';
 
 @Controller('products/:productId/product-images')
 @ApiTags('Product Images')
@@ -20,24 +24,36 @@ export class ProductImagesController {
     private readonly productsService: ProductsService,
   ) {}
 
+  @Get()
+  async getAll(@Param('productId', ParseIntPipe) productId: number) {
+    const product = await this.productsService.getByIdEvenIfDeleted(productId, [
+      'images',
+    ]);
+    return product.images;
+  }
+
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, OnlyAdminGuard)
   async create(
     @Param('productId', ParseIntPipe) productId: number,
     @Body() body: CreateProductImageDto,
   ) {
     const product = await this.productsService.getByIdEvenIfDeleted(productId);
-    if (product.image) {
-      throw new BadRequestException('Product already has an image');
+    if (!product) {
+      throw new NotFoundException('Product not found');
     }
-    return this.productImagesService.create(product, body);
+
+    await this.productImagesService.addNewImageToProduct(product, body);
   }
 
-  @Delete()
-  async remove(@Param('productId', ParseIntPipe) productId: number) {
-    const product = await this.productsService.getByIdEvenIfDeleted(productId);
-    if (!product.image) {
-      return;
-    }
-    return this.productImagesService.remove(product.image);
+  @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, OnlyAdminGuard)
+  async removeById(
+    @Param('productId', ParseIntPipe) productId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    await this.productImagesService.removeById(id);
   }
 }

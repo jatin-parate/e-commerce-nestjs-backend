@@ -20,13 +20,16 @@ export class ProductsService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  async findAll({
-    isActive,
-    search: productName,
-    limit,
-    sort,
-    order,
-  }: GetAllProductsQueryDto): Promise<Product[]> {
+  async findAll(
+    {
+      isActive,
+      search: productName,
+      limit,
+      sort,
+      order,
+    }: GetAllProductsQueryDto,
+    relations: string[] = [],
+  ): Promise<Product[]> {
     const extraWhereOptions: FindConditions<Product> = {};
 
     if (productName) {
@@ -47,7 +50,7 @@ export class ProductsService {
       order: {
         [sort]: order,
       },
-      relations: ['image'],
+      relations,
     });
   }
 
@@ -59,10 +62,13 @@ export class ProductsService {
     return await this.productRepository.findOne(id);
   }
 
-  async getByIdEvenIfDeleted(id: number): Promise<Product | undefined> {
+  async getByIdEvenIfDeleted(
+    id: number,
+    relations: string[] = [],
+  ): Promise<Product | undefined> {
     return await this.productRepository.findOne(id, {
       withDeleted: true,
-      relations: ['image'],
+      relations,
     });
   }
 

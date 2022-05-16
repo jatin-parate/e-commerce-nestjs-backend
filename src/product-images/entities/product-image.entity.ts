@@ -1,4 +1,4 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { IProductImage } from '../types/product-image.interface';
 import { Product } from '../../products/entities/product';
 
@@ -10,7 +10,9 @@ export class ProductImage implements IProductImage {
   @Column()
   imageUrl: string;
 
-  @OneToOne(() => Product, (product) => product.image, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Product, (product) => product.images, {
+    onDelete: 'CASCADE',
+  })
   product: Product;
 
   constructor(partial: Partial<ProductImage>) {

@@ -12,15 +12,19 @@ export class ProductImagesService {
     private readonly productImageRepo: Repository<ProductImage>,
   ) {}
 
-  async create(product: Product, { imageUrl }: CreateProductImageDto) {
-    const image = new ProductImage({
+  async addNewImageToProduct(
+    product: Product,
+    { imageUrl }: CreateProductImageDto,
+  ) {
+    const productImage = new ProductImage({
+      product,
       imageUrl,
     });
-    image.product = product;
-    await this.productImageRepo.save(image);
+
+    await this.productImageRepo.save(productImage);
   }
 
-  async remove(image: ProductImage) {
-    await this.productImageRepo.remove(image);
+  async removeById(id: number) {
+    await this.productImageRepo.delete(id);
   }
 }
