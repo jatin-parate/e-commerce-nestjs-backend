@@ -9,7 +9,6 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ProductImage } from '../../product-images/entities/product-image.entity';
 
 export class UpdateProductDto
   implements Partial<Omit<IProductData, 'deletedAt'>>
@@ -38,13 +37,6 @@ export class UpdateProductDto
   @IsNotEmpty()
   @IsNumber()
   price?: number;
-
-  @IsOptional()
-  @IsNotEmpty()
-  @IsNumber()
-  quantity?: number;
-
-  image?: ProductImage;
 
   constructor(partial: Partial<UpdateProductDto>) {
     Object.assign(this, partial);

@@ -25,9 +25,6 @@ export class Product implements IProduct {
   @Column()
   description: string;
 
-  @Column()
-  quantity!: number;
-
   @CreateDateColumn()
   createdAt!: Date;
 
