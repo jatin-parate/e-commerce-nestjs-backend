@@ -59,6 +59,9 @@ export class AuthService {
     }
 
     user.password = await this.hashPassword(user.password);
-    return this.usersService.create(user);
+    return this.usersService.create({
+      ...user,
+      orders: [],
+    });
   }
 }
