@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -24,6 +25,7 @@ export class User implements IUserWithOrders {
   name: string;
 
   @Column()
+  @Index()
   email: string;
 
   @Column()

@@ -2,6 +2,7 @@ import { Product } from 'src/products/entities/product';
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToOne,
@@ -20,10 +21,12 @@ export class LineItem implements ILineItemWithOrder, ILineItemWithProduct {
 
   @ManyToOne(() => Order, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn()
+  @Index()
   order: Order | number;
 
   @OneToOne(() => Product, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn()
+  @Index()
   product: Product | number;
 
   @Column({ nullable: false })

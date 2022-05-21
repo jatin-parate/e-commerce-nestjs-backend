@@ -1,4 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { IProductImage } from '../types/product-image.interface';
 import { Product } from '../../products/entities/product';
 
@@ -8,6 +14,7 @@ export class ProductImage implements IProductImage {
   id: number;
 
   @Column()
+  @Index()
   imageUrl: string;
 
   @ManyToOne(() => Product, (product) => product.images, {

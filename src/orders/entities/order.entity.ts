@@ -1,6 +1,7 @@
 import { User } from 'src/users/entities/user';
 import {
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -19,6 +20,7 @@ export class Order implements IOrderWithUser {
     onDelete: 'CASCADE',
   })
   @JoinColumn()
+  @Index()
   user: User;
 
   @OneToMany(() => LineItem, (lineItem) => lineItem.order, {

@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
   JoinTable,
   OneToMany,
+  Index,
 } from 'typeorm';
 import { IProduct } from '../interfaces/product.interface';
 import { ProductImage } from '../../product-images/entities/product-image.entity';
@@ -17,6 +18,7 @@ export class Product implements IProduct {
   id: number;
 
   @Column()
+  @Index()
   name!: string;
 
   @Column()
@@ -29,12 +31,14 @@ export class Product implements IProduct {
   createdAt!: Date;
 
   @UpdateDateColumn()
+  @Index()
   updatedAt!: Date;
 
   @DeleteDateColumn()
   deletedAt?: Date;
 
   @Column({ default: true })
+  @Index()
   isActive!: boolean;
 
   @Column({ default: false })
