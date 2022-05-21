@@ -1,11 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsUrl } from 'class-validator';
-import { IProductImageData } from '../types/product-image.interface';
+import { IsOptional, IsString, IsUrl } from 'class-validator';
 
-export class CreateProductImageDto implements IProductImageData {
-  @IsNotEmpty()
+export class CreateProductImageDto {
+  @IsOptional()
   @IsString()
   @IsUrl()
-  @ApiProperty({ example: 'https://www.google.com' })
-  imageUrl: string;
+  @ApiProperty({ example: 'https://www.google.com', required: false })
+  imageUrl?: string;
+
+  @ApiProperty({ required: false, type: 'file' })
+  image?: Express.Multer.File;
 }

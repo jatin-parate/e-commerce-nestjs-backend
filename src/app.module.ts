@@ -14,6 +14,7 @@ import { Connection } from 'typeorm';
 import { ProductImagesModule } from './product-images/product-images.module';
 import { OrdersModule } from './orders/orders.module';
 import { AppCacheModule } from './cache/cache.module';
+import { S3Module } from './s3/s3.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { AppCacheModule } from './cache/cache.module';
     AuthModule,
     ProductImagesModule,
     OrdersModule,
+    S3Module,
   ],
   controllers: [AppController],
   providers: [AppService],
