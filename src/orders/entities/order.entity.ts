@@ -6,10 +6,11 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { IOrderWithUser } from '../interfaces/order.interface';
 import { LineItem } from './line-item.entity';
 
 @Entity()
-export class Order {
+export class Order implements IOrderWithUser {
   @PrimaryGeneratedColumn()
   id: number;
 

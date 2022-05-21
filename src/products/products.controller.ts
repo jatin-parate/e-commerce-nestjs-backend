@@ -11,17 +11,14 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OnlyAdminGuard } from '../guards/only-admin.guard';
 import { CreateProductDto } from './dtos/create-product.dto';
-import {
-  GetAllProductsQueryDto,
-  SortDirection,
-} from './dtos/get-all-products-query.dto';
+import { GetAllProductsQueryDto } from './dtos/get-all-products-query.dto';
 import { ProductsService } from './products.service';
-import { Product } from './entities/product';
 import UpdateProductBodyDto from './dtos/update-product-body.dto';
+import { GetAllProductResponse } from './responses/get-products.response';
 
 @Controller('products')
 @ApiTags('Products')
@@ -29,25 +26,22 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get('')
-  @ApiQuery({ name: 'search', required: false, type: String })
-  @ApiQuery({ name: 'isActive', required: false, type: Boolean })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'sort', required: false, type: String })
-  @ApiQuery({
-    name: 'order',
-    required: false,
-    type: String,
-    enum: SortDirection,
-  })
-  async getAll(@Query() query: GetAllProductsQueryDto): Promise<Product[]> {
-    return await this.productsService.findAll(query);
+  @ApiResponse({ type: GetAllProductResponse, status: 200, isArray: true })
+  async getAll(
+    @Query() query: GetAllProductsQueryDto,
+  ): Promise<GetAllProductResponse[]> {
+    const products = await this.productsService.findAll(query);
+
+    return products.map((product) => new GetAllProductResponse(product));
   }
 
   @Post('')
   @UseGuards(JwtAuthGuard, OnlyAdminGuard)
   @ApiBearerAuth()
-  async create(@Body() body: CreateProductDto): Promise<any> {
-    return await this.productsService.create(body);
+  @ApiResponse({ type: GetAllProductResponse, status: 201 })
+  async create(@Body() body: CreateProductDto): Promise<GetAllProductResponse> {
+    const product = await this.productsService.create(body);
+    return new GetAllProductResponse(product);
   }
 
   @Delete(':id')
@@ -64,14 +58,19 @@ export class ProductsController {
   @Put(':id')
   @UseGuards(JwtAuthGuard, OnlyAdminGuard)
   @ApiBearerAuth()
+  @ApiResponse({ type: GetAllProductResponse, status: 200 })
   async updateById(
     @Body() body: UpdateProductBodyDto,
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<Product> {
+  ): Promise<GetAllProductResponse> {
     const product = await this.productsService.getByIdEvenIfDeleted(id);
     if (!product) {
       throw new NotFoundException('Product not found');
     }
-    return await this.productsService.update(product, body.product);
+    const updatedProduct = await this.productsService.update(
+      product,
+      body.product,
+    );
+    return new GetAllProductResponse(updatedProduct);
   }
 }

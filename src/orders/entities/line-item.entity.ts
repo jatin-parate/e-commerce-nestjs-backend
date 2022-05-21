@@ -7,10 +7,14 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import {
+  ILineItemWithOrder,
+  ILineItemWithProduct,
+} from '../interfaces/line-item.interface';
 import { Order } from './order.entity';
 
 @Entity()
-export class LineItem {
+export class LineItem implements ILineItemWithOrder, ILineItemWithProduct {
   @PrimaryGeneratedColumn()
   id: number;
 
