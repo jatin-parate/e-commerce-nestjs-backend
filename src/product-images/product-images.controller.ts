@@ -29,7 +29,7 @@ export class ProductImagesController {
     const product = await this.productsService.getByIdEvenIfDeleted(productId, [
       'images',
     ]);
-    return product.images;
+    return product!.images;
   }
 
   @Post()

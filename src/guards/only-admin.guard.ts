@@ -19,7 +19,7 @@ export class OnlyAdminGuard implements CanActivate {
       throw new UnauthorizedException('User not found!');
     }
 
-    const user = req.user as User;
+    const user = req.user!;
     if (user.role === Roles.ADMIN) {
       return true;
     }

@@ -28,7 +28,7 @@ export class OrdersController {
 
   @Post()
   create(@Body() createOrderDto: CreateOrderDto, @Req() req: Request) {
-    return this.ordersService.create(createOrderDto, req.user as User);
+    return this.ordersService.create(createOrderDto, req.user!);
   }
 
   @Put(':orderId/adjustQuantity')
@@ -41,7 +41,7 @@ export class OrdersController {
 
   @Get()
   findAll(@Req() req: Request, @Query() query: GetAllOrdersOptions) {
-    return this.ordersService.findAll(req.user as User, query);
+    return this.ordersService.findAll(req.user!, query);
   }
 
   @Get(':id')

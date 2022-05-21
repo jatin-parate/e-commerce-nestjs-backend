@@ -38,7 +38,7 @@ export class ProductsService {
 
     if (isActive === true) {
       extraWhereOptions.isActive = true;
-      extraWhereOptions.deletedAt = null;
+      extraWhereOptions.deletedAt = undefined;
     } else if (isActive === false) {
       extraWhereOptions.isActive = false;
       extraWhereOptions.deletedAt = Not(IsNull());

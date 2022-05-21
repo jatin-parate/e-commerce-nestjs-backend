@@ -32,7 +32,7 @@ export class OrdersService {
         return this.lineItemsRepo.create({
           product,
           quantity,
-          unitPrice: product.price,
+          unitPrice: product!.price,
         });
       }),
     );
@@ -61,7 +61,7 @@ export class OrdersService {
       lineItem = this.lineItemsRepo.create({
         order: orderId,
         product,
-        unitPrice: product.price,
+        unitPrice: product!.price,
       });
     }
 

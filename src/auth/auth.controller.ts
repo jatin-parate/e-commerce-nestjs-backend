@@ -30,14 +30,14 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiBody({ type: LoginDto })
   async login(@Request() req: ExpressRequest) {
-    return await this.authService.login(req.user as User);
+    return await this.authService.login(req.user!);
   }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get('profile')
   async getProfile(@Request() req: ExpressRequest): Promise<User> {
-    return req.user as User;
+    return req.user!;
   }
 
   @Post('register')

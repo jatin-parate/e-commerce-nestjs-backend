@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { IUserWithOrders } from '../types/user.interface';
 
 export enum Roles {
   ADMIN = 'ADMIN',
@@ -15,7 +16,7 @@ export enum Roles {
 }
 
 @Entity()
-export class User {
+export class User implements IUserWithOrders {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -39,7 +40,7 @@ export class User {
   updatedAt: Date;
 
   @OneToMany(() => Order, (order) => order.user)
-  orders: Order[];
+  orders?: Order[];
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);

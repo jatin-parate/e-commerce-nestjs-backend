@@ -21,7 +21,7 @@ export class AuthService {
   async hashPassword(password: string) {
     const hashedPassword = await pbkdf2(
       password,
-      this.configService.get<string>('APP_SECRET'),
+      this.configService.get<string>('APP_SECRET')!,
       100000,
       64,
       'sha512',
@@ -29,11 +29,11 @@ export class AuthService {
     return hashedPassword.toString('hex');
   }
 
-  async validateUser(email: string, password: string): Promise<User | null> {
+  async validateUser(email: string, password: string): Promise<Optional<User>> {
     const user = await this.usersService.findOne(email);
 
     if (!user) {
-      return null;
+      return;
     }
 
     const hashedPassword = await this.hashPassword(password);
@@ -41,7 +41,6 @@ export class AuthService {
     if (user.password === hashedPassword) {
       return user;
     }
-    return null;
   }
 
   async login(user: User) {

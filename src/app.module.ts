@@ -13,6 +13,7 @@ import { AuthModule } from './auth/auth.module';
 import { Connection } from 'typeorm';
 import { ProductImagesModule } from './product-images/product-images.module';
 import { OrdersModule } from './orders/orders.module';
+import { AppCacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { OrdersModule } from './orders/orders.module';
         return {
           type: configService.get<TypeOrmModuleOptions['type']>('DB_TYPE'),
           host: configService.get<string>('DB_HOST'),
-          port: +configService.get<number>('DB_PORT'),
+          port: +configService.get<number>('DB_PORT')!,
           username: configService.get<string>('DB_USERNAME'),
           password: configService.get<string>('DB_PASSWORD'),
           database: configService.get<string>('DB_DATABASE'),
@@ -36,6 +37,7 @@ import { OrdersModule } from './orders/orders.module';
         } as TypeOrmModuleOptions;
       },
     }),
+    AppCacheModule,
     ProductsModule,
     UsersModule,
     AuthModule,

@@ -1,8 +1,11 @@
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IUser } from 'src/users/types/user.interface';
 
-export class CreateUserDto {
+export class CreateUserDto
+  implements Pick<IUser, 'email' | 'name' | 'password'>
+{
   @ApiProperty({ format: 'email', required: true })
   @IsEmail()
   @IsNotEmpty()
