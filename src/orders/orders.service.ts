@@ -29,11 +29,17 @@ export class OrdersService {
     const lineItems = await Promise.all(
       [...productIds.entries()].map(async ([productId, quantity]) => {
         const product = await this.productsService.getNonDeletedById(productId);
-        return this.lineItemsRepo.create({
+        const lineItem = await this.lineItemsRepo.create({
           product,
           quantity,
           unitPrice: product!.price,
         });
+
+        await this.productsService.update(productId, {
+          quantityUpdate: -quantity,
+        });
+
+        return lineItem;
       }),
     );
     const order = this.ordersRepo.create({

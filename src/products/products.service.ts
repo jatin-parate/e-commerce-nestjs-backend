@@ -91,7 +91,7 @@ export class ProductsService {
         return;
       }
       Object.assign(product, updateData);
-      if (quantityUpdate) {
+      if (quantityUpdate && product.quantity + quantityUpdate >= 0) {
         product.quantity += quantityUpdate;
       }
       await entityManager.save(product);
