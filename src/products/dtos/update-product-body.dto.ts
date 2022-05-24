@@ -44,6 +44,12 @@ export class UpdateProductDto
   @IsNumber()
   price?: number;
 
+  @ApiProperty()
+  @IsOptional()
+  @IsNotEmpty()
+  @IsNumber()
+  quantityUpdate?: number;
+
   constructor(partial: Partial<UpdateProductDto>) {
     Object.assign(this, partial);
   }

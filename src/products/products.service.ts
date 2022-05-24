@@ -44,6 +44,8 @@ export class ProductsService {
       extraWhereOptions.deletedAt = Not(IsNull());
     }
 
+    extraWhereOptions.quantity = Not(0);
+
     return await this.productRepository.find({
       where: extraWhereOptions,
       take: limit,
@@ -77,10 +79,23 @@ export class ProductsService {
   }
 
   async update(
-    product: Product,
-    updateData: UpdateProductDto,
-  ): Promise<Product> {
-    Object.assign(product, updateData);
-    return await this.productRepository.save(product);
+    productId: Product['id'],
+    { quantityUpdate, ...updateData }: UpdateProductDto,
+  ): Promise<Optional<Product>> {
+    let product: Product | undefined;
+    await this.productRepository.manager.transaction(async (entityManager) => {
+      product = await entityManager.findOne(Product, productId, {
+        withDeleted: true,
+      });
+      if (!product) {
+        return;
+      }
+      Object.assign(product, updateData);
+      if (quantityUpdate) {
+        product.quantity += quantityUpdate;
+      }
+      await entityManager.save(product);
+    });
+    return product;
   }
 }

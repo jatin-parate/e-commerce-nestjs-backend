@@ -5,6 +5,7 @@ export interface IProductData {
   deletedAt?: Date;
   isActive: boolean;
   isBestSeller: boolean;
+  quantity: number;
 }
 
 export interface IProduct extends IProductData {

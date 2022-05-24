@@ -24,6 +24,9 @@ export class GetAllProductResponse implements IProduct {
   deletedAt?: Date | undefined;
 
   @ApiProperty()
+  quantity: number;
+
+  @ApiProperty()
   isActive: boolean;
 
   @ApiProperty()

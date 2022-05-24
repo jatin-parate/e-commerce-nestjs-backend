@@ -63,14 +63,10 @@ export class ProductsController {
     @Body() body: UpdateProductBodyDto,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<GetAllProductResponse> {
-    const product = await this.productsService.getByIdEvenIfDeleted(id);
-    if (!product) {
+    const updatedProduct = await this.productsService.update(id, body.product);
+    if (!updatedProduct) {
       throw new NotFoundException('Product not found');
     }
-    const updatedProduct = await this.productsService.update(
-      product,
-      body.product,
-    );
     return new GetAllProductResponse(updatedProduct);
   }
 }

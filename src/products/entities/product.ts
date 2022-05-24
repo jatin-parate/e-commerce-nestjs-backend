@@ -44,6 +44,9 @@ export class Product implements IProduct {
   @Column({ default: false })
   isBestSeller!: boolean;
 
+  @Column({ default: 0 })
+  quantity!: number;
+
   @OneToMany(() => ProductImage, (image) => image.product, {
     onDelete: 'CASCADE',
   })
