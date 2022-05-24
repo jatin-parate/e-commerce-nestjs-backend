@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Product } from 'src/products/entities/product';
 import { ProductsService } from 'src/products/products.service';
 import { User } from 'src/users/entities/user';
 import { Repository } from 'typeorm';
@@ -29,24 +30,38 @@ export class OrdersService {
     const lineItems = await Promise.all(
       [...productIds.entries()].map(async ([productId, quantity]) => {
         const product = await this.productsService.getNonDeletedById(productId);
-        const lineItem = await this.lineItemsRepo.create({
+        const lineItem = this.lineItemsRepo.create({
           product,
           quantity,
           unitPrice: product!.price,
         });
 
-        await this.productsService.update(productId, {
-          quantityUpdate: -quantity,
-        });
-
         return lineItem;
       }),
     );
-    const order = this.ordersRepo.create({
-      user,
-      lineItems,
-    });
-    return await this.ordersRepo.save(order);
+    const quantityUpdateData: { [productId: string]: number } = {};
+    for (const lineItem of lineItems) {
+      const productId = (lineItem.product as Product).id.toString();
+      const quantity = -lineItem.quantity;
+      quantityUpdateData[productId] = quantity;
+    }
+
+    let savedOrder: Order;
+    await this.productsService.updateManyQuantities(
+      quantityUpdateData,
+      async (entityManager) => {
+        const order = this.ordersRepo.create({
+          user,
+          lineItems,
+        });
+
+        savedOrder = await entityManager.save(order);
+        return savedOrder;
+      },
+    );
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return savedOrder;
   }
 
   async adjustQuantity(orderId: number, adjustQuantityDto: AdjustQuantityDto) {

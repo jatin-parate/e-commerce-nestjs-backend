@@ -1,6 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  EntityManager,
   FindConditions,
   IsNull,
   Like,
@@ -60,7 +65,7 @@ export class ProductsService {
     return await this.productRepository.save(product);
   }
 
-  async getNonDeletedById(id: number): Promise<Product | undefined> {
+  async getNonDeletedById(id: number): Promise<Optional<Product>> {
     return await this.productRepository.findOne(id);
   }
 
@@ -97,5 +102,39 @@ export class ProductsService {
       await entityManager.save(product);
     });
     return product;
+  }
+
+  async updateManyQuantities(
+    data: { [productId: string]: number },
+    callback?: (entityManager: EntityManager) => Promise<any>,
+  ) {
+    await this.productRepository.manager.transaction(async (entityManager) => {
+      for (const stringProductId of Object.keys(data)) {
+        const product = await entityManager.findOne(
+          Product,
+          parseInt(stringProductId, 10),
+          {
+            withDeleted: true,
+          },
+        );
+        if (!product) {
+          throw new NotFoundException(
+            `Product with id ${stringProductId} not found`,
+          );
+        }
+        if (product.quantity + data[stringProductId] < 0) {
+          throw new BadRequestException(
+            product.quantity === 0
+              ? `Product ${product.name} has gone out of stock!`
+              : `Product ${product.name} has only ${product.quantity} stocks!`,
+          );
+        }
+        product.quantity += data[stringProductId];
+        await entityManager.save(product);
+      }
+      if (callback) {
+        await callback(entityManager);
+      }
+    });
   }
 }

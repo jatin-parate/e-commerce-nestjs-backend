@@ -25,7 +25,7 @@ export class User implements IUserWithOrders {
   name: string;
 
   @Column()
-  @Index()
+  @Index({ unique: true })
   email: string;
 
   @Column()

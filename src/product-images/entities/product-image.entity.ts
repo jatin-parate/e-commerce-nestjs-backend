@@ -14,7 +14,7 @@ export class ProductImage implements IProductImage {
   id: number;
 
   @Column()
-  @Index()
+  @Index({ unique: false })
   imageUrl: string;
 
   @ManyToOne(() => Product, (product) => product.images, {

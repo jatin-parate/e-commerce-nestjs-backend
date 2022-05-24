@@ -15,7 +15,6 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Request } from 'express';
-import { User } from 'src/users/entities/user';
 import { AdjustQuantityDto } from './dto/adjust-quantity.dto';
 import { GetAllOrdersOptions } from './dto/get-all-orders-options.dto';
 

@@ -5,7 +5,6 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import {
@@ -21,12 +20,12 @@ export class LineItem implements ILineItemWithOrder, ILineItemWithProduct {
 
   @ManyToOne(() => Order, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn()
-  @Index()
+  @Index({ unique: false })
   order: Order | number;
 
-  @OneToOne(() => Product, { nullable: false, onDelete: 'CASCADE' })
+  @ManyToOne(() => Product, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn()
-  @Index()
+  @Index({ unique: false })
   product: Product | number;
 
   @Column({ nullable: false })

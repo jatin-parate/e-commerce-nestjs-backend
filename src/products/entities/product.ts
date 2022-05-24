@@ -18,7 +18,7 @@ export class Product implements IProduct {
   id: number;
 
   @Column()
-  @Index()
+  @Index({ unique: false })
   name!: string;
 
   @Column()
@@ -31,14 +31,14 @@ export class Product implements IProduct {
   createdAt!: Date;
 
   @UpdateDateColumn()
-  @Index()
+  @Index({ unique: false })
   updatedAt!: Date;
 
   @DeleteDateColumn()
   deletedAt?: Date;
 
   @Column({ default: true })
-  @Index()
+  @Index({ unique: false })
   isActive!: boolean;
 
   @Column({ default: false })

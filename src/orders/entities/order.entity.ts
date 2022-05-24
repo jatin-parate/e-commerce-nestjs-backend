@@ -20,7 +20,7 @@ export class Order implements IOrderWithUser {
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  @Index()
+  @Index({ unique: false })
   user: User;
 
   @OneToMany(() => LineItem, (lineItem) => lineItem.order, {
