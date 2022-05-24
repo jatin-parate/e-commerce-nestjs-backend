@@ -17,6 +17,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Request } from 'express';
 import { AdjustQuantityDto } from './dto/adjust-quantity.dto';
 import { GetAllOrdersOptions } from './dto/get-all-orders-options.dto';
+import { Product } from 'src/products/entities/product';
 
 @Controller('orders')
 @ApiTags('orders')
@@ -26,8 +27,19 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  create(@Body() createOrderDto: CreateOrderDto, @Req() req: Request) {
-    return this.ordersService.create(createOrderDto, req.user!);
+  async create(@Body() createOrderDto: CreateOrderDto, @Req() req: Request) {
+    const { lineItems, ...orderData } = await this.ordersService.create(
+      createOrderDto,
+      req.user!,
+    );
+
+    return {
+      ...orderData,
+      lineItems: lineItems.map((lineItem) => ({
+        ...lineItem,
+        product: (lineItem.product as Product).id,
+      })),
+    };
   }
 
   @Put(':orderId/adjustQuantity')
