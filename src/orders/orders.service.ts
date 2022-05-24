@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/products/entities/product';
 import { ProductsService } from 'src/products/products.service';
@@ -64,31 +64,35 @@ export class OrdersService {
     return savedOrder;
   }
 
-  async adjustQuantity(orderId: number, adjustQuantityDto: AdjustQuantityDto) {
-    if (adjustQuantityDto.quantity === 0) {
-      await this.lineItemsRepo.delete({ id: adjustQuantityDto.lineItemId });
-      return;
-    }
-
+  async adjustQuantity(
+    orderId: number,
+    adjustQuantityDto: AdjustQuantityDto,
+  ): Promise<Optional<LineItem>> {
     let lineItem = await this.lineItemsRepo.findOne({
       id: adjustQuantityDto.lineItemId,
       order: orderId,
     });
 
     if (!lineItem) {
-      const product = await this.productsService.getNonDeletedById(
-        adjustQuantityDto.lineItemId,
-      );
-      lineItem = this.lineItemsRepo.create({
-        order: orderId,
-        product,
-        unitPrice: product!.price,
-      });
+      throw new NotFoundException('Line item not found!');
     }
 
-    lineItem.quantity = adjustQuantityDto.quantity;
+    await this.productsService.updateManyQuantities(
+      {
+        [lineItem.product as number]: adjustQuantityDto.quantity,
+      },
+      async (entityManager) => {
+        if (lineItem!.quantity + adjustQuantityDto.quantity <= 0) {
+          await entityManager.delete(LineItem, lineItem!.id);
+          lineItem = undefined;
+        } else {
+          lineItem!.quantity += adjustQuantityDto.quantity;
+          lineItem = await entityManager.save(lineItem);
+        }
+      },
+    );
 
-    return await this.lineItemsRepo.save(lineItem);
+    return lineItem;
   }
 
   async findAll(user: User, findOptions: GetAllOrdersOptions) {

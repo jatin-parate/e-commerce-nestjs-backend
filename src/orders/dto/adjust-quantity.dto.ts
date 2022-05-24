@@ -7,7 +7,7 @@ export class AdjustQuantityDto {
   @IsInt()
   lineItemId: number;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'Quantity to adjust' })
   @IsNotEmpty()
   @IsInt()
   quantity: number;
