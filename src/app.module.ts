@@ -35,6 +35,8 @@ import { S3Module } from './s3/s3.module';
           database: configService.get<string>('DB_DATABASE'),
           autoLoadEntities: true,
           synchronize: configService.get<string>('DB_SYNCHRONIZE') === 'true',
+          useUTC: true,
+          applicationName: configService.get<string>('APP_NAME'),
         } as TypeOrmModuleOptions;
       },
     }),
