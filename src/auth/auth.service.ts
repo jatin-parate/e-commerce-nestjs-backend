@@ -22,7 +22,7 @@ export class AuthService {
     const hashedPassword = await pbkdf2(
       password,
       this.configService.get<string>('APP_SECRET')!,
-      100000,
+      1_00_000,
       64,
       'sha512',
     );
